@@ -4,7 +4,6 @@ import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.util.TimePrinter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
@@ -16,7 +15,7 @@ public class AsyncProfilerSession {
   private String myReportPath;
   private String myCommandLine;
 
-  @Nullable
+  @NotNull
   public ExecResult getResult() {
     ExecResult inProgress = new ExecResult();
     long timeSpent = Dates.now().getTime() - myStartTime.getTime();
@@ -26,6 +25,10 @@ public class AsyncProfilerSession {
 
   public boolean isFinished() {
     return myFuture.isDone();
+  }
+
+  public boolean isFailed() {
+    return isFinished() && getResult().getExitCode() != 0;
   }
 
   public void setFuture(@NotNull CompletableFuture<ExecResult> future) {

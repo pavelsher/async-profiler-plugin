@@ -68,17 +68,32 @@
 </form>
 
 <c:if test="${not empty settingsBean.profilerSession}">
-    <pre>Started: <c:out value="${settingsBean.profilerSession.commandLine}"/></pre>
-    <pre><c:out value="${settingsBean.profilerSession.result.stdout}"/></pre>
-    <c:if test="${not settingsBean.profilerSession.finished}">
+    <c:set var="session" value="${settingsBean.profilerSession}"/>
+    <pre>Command line: <c:out value="${session.commandLine}"/></pre>
+    <c:if test="${not session.finished}">
+    <pre><c:out value="${session.result.stdout}"/></pre>
     <script type="text/javascript">
         window.setTimeout(function() {
             $('profilerComponent').refresh();
         }, 3000);
     </script>
     </c:if>
-    <c:if test="${settingsBean.profilerSession.finished}">
-        <a class="downloadLink tc-icon_before icon16 tc-icon_download" href="<c:url value='/admin/admin.html?item=diagnostics&tab=logs&file=${settingsBean.profilerSession.reportPath}&forceAttachment=true'/>">Profiler report</a>
+    <c:if test="${session.finished}">
+        <c:if test="${session.failed}">
+            <pre style="color:red">Execution failed</pre>
+            <c:if test="${not empty session.result.exception}">
+                <pre style="color:red"><c:out value="${session.result.exception.message}"/></pre>
+            </c:if>
+        </c:if>
+        <c:if test="${not empty session.result.stdout}">
+            <pre><c:out value="${session.result.stdout}"/></pre>
+        </c:if>
+        <c:if test="${not empty session.result.stderr}">
+            <pre style="color: chocolate"><c:out value="${session.result.stderr}"/></pre>
+        </c:if>
+        <c:if test="${not session.failed}">
+            <a class="downloadLink tc-icon_before icon16 tc-icon_download" style="float:none" href="<c:url value='/admin/admin.html?item=diagnostics&tab=logs&file=${session.reportPath}&forceAttachment=true'/>">Profiler report</a>
+        </c:if>
     </c:if>
 </c:if>
 </bs:refreshable>

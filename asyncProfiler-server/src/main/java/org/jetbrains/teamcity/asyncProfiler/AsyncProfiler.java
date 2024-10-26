@@ -1,6 +1,7 @@
 package org.jetbrains.teamcity.asyncProfiler;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
+import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.SimpleCommandLineProcessRunner;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FileUtil;
@@ -33,15 +34,20 @@ public class AsyncProfiler {
 
   @NotNull
   public AsyncProfilerSession start() {
+    AsyncProfilerSession session = new AsyncProfilerSession();
+    session.setRelativeReportPath(FileUtil.getRelativePath(myServerPaths.getLogsPath(), new File(myReportPath)).replace('\\', '/'));
+
     if (!myPidFile.isFile()) {
-      throw new IllegalStateException("TeamCity pid file does not exist: " + myPidFile.getAbsolutePath());
+      session.setFuture(CompletableFuture.completedFuture(createFailedResult("TeamCity pid file does not exist: " + myPidFile.getAbsolutePath())));
+      return session;
     }
 
     String pid;
     try {
       pid = FileUtil.readText(myPidFile).trim();
     } catch (IOException e) {
-      throw new RuntimeException("Cannot read from the pid file " + myPidFile.getAbsolutePath(), e);
+      session.setFuture(CompletableFuture.completedFuture(createFailedResult("Cannot read from the pid file " + myPidFile.getAbsolutePath() + ", error: " + e.toString())));
+      return session;
     }
 
     GeneralCommandLine cli = new GeneralCommandLine();
@@ -51,10 +57,16 @@ public class AsyncProfiler {
     cli.addParameter(myReportPath);
     cli.addParameter(pid);
 
-    AsyncProfilerSession session = new AsyncProfilerSession();
-    session.setRelativeReportPath(FileUtil.getRelativePath(myServerPaths.getLogsPath(), new File(myReportPath)).replace('\\', '/'));
-    session.setCommandLine(cli.toString());
+    session.setCommandLine(cli.getCommandLineString());
     session.setFuture(CompletableFuture.supplyAsync(() -> SimpleCommandLineProcessRunner.runCommand(cli, null), myExecutor));
     return session;
+  }
+
+  @NotNull
+  private ExecResult createFailedResult(@NotNull String message) {
+    ExecResult failedResult = new ExecResult();
+    failedResult.setStderr(message);
+    failedResult.setExitCode(-100);
+    return failedResult;
   }
 }
