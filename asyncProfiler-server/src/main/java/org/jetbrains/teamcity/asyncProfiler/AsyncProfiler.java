@@ -53,6 +53,7 @@ public class AsyncProfiler {
 
     AsyncProfilerSession session = new AsyncProfilerSession();
     session.setRelativeReportPath(FileUtil.getRelativePath(myServerPaths.getLogsPath(), new File(myReportPath)).replace('\\', '/'));
+    session.setCommandLine(cli.toString());
     session.setFuture(CompletableFuture.supplyAsync(() -> SimpleCommandLineProcessRunner.runCommand(cli, null), myExecutor));
     return session;
   }

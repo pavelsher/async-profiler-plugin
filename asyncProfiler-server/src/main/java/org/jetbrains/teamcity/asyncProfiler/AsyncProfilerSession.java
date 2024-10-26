@@ -14,6 +14,7 @@ public class AsyncProfilerSession {
   private CompletableFuture<ExecResult> myFuture;
   private Date myStartTime;
   private String myReportPath;
+  private String myCommandLine;
 
   @Nullable
   public ExecResult getResult() {
@@ -38,5 +39,13 @@ public class AsyncProfilerSession {
 
   public String getReportPath() {
     return myReportPath;
+  }
+
+  public void setCommandLine(String commandLine) {
+    myCommandLine = commandLine;
+  }
+
+  public String getCommandLine() {
+    return myCommandLine;
   }
 }

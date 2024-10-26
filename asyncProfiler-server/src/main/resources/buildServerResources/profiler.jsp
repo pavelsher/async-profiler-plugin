@@ -68,6 +68,7 @@
 </form>
 
 <c:if test="${not empty settingsBean.profilerSession}">
+    <pre>Started: <c:out value="${settingsBean.profilerSession.commandLine}"/></pre>
     <pre><c:out value="${settingsBean.profilerSession.result.stdout}"/></pre>
     <c:if test="${not settingsBean.profilerSession.finished}">
     <script type="text/javascript">
