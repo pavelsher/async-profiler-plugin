@@ -3,8 +3,30 @@
 <%@ taglib prefix="forms" tagdir="/WEB-INF/tags/forms" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <jsp:useBean id="settingsBean" type="org.jetbrains.teamcity.asyncProfiler.ProfilerSettingsBean" scope="request"/>
-<bs:linkScript>
-</bs:linkScript>
+<script type="text/javascript">
+    var Profiler = {
+        start: function() {
+            BS.ajaxRequest($('profilerForm').action, {
+                parameters: 'profilerPath=' + encodeURIComponent($j('#profilerPath').val()) +
+                            '&args=' + encodeURIComponent($j('#args').val()) +
+                            '&startProfiler=1',
+                onComplete: function(transport) {
+                    if (transport.responseXML) {
+                        BS.XMLResponse.processErrors(transport.responseXML, {
+                            onProfilerProblemError: function(elem) {
+                                alert(elem.firstChild.nodeValue);
+                            }
+                        });
+                    }
+
+                    $('profilerComponent').refresh();
+                }
+            });
+
+            return false;
+        }
+    };
+</script>
 <c:url var="actionUrl" value="/admin/diagnostics/asyncProfiler.html"/>
 <bs:refreshable containerId="profilerComponent" pageUrl="${pageUrl}">
 <bs:messages key="profilerMessage"/>
@@ -33,9 +55,19 @@
     </table>
 
     <div class="saveButtonsBlock">
-        <forms:submit label="Start"/>
-        <forms:saving/>
+        <forms:submit label="Start" onclick="return Profiler.start()" disabled="${not empty settingsBean.profilerSession and not settingsBean.profilerSession.finished}"/>
     </div>
 
 </form>
+
+<c:if test="${not empty settingsBean.profilerSession}">
+    <pre><c:out value="${settingsBean.profilerSession.result.stdout}"/></pre>
+    <c:if test="${not settingsBean.profilerSession.finished}">
+    <script type="text/javascript">
+        window.setTimeout(function() {
+            $('profilerComponent').refresh();
+        }, 3000);
+    </script>
+    </c:if>
+</c:if>
 </bs:refreshable>
