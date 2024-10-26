@@ -78,7 +78,7 @@
     </script>
     </c:if>
     <c:if test="${settingsBean.profilerSession.finished}">
-        <a href="<c:url value='/admin/admin.html?item=diagnostics&tab=logs&file=${settingsBean.profilerSession.reportPath}'/>">Profiler report</a>
+        <a class="downloadLink tc-icon_before icon16 tc-icon_download" href="<c:url value='/admin/admin.html?item=diagnostics&tab=logs&file=${settingsBean.profilerSession.reportPath}&forceAttachment=true'/>">Profiler report</a>
     </c:if>
 </c:if>
 </bs:refreshable>
