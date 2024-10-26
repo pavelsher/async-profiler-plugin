@@ -92,7 +92,7 @@
             <pre style="color: chocolate"><c:out value="${session.result.stderr}"/></pre>
         </c:if>
         <c:if test="${not session.failed}">
-            <a class="downloadLink tc-icon_before icon16 tc-icon_download" style="float:none" href="<c:url value='/admin/admin.html?item=diagnostics&tab=logs&file=${session.reportPath}&forceAttachment=true'/>">Profiler report</a>
+            <a class="downloadLink tc-icon_before icon16 tc-icon_download" style="float:none" href="<c:url value='/get/file/serverLogs/${session.reportPath}?forceAttachment=true'/>">Profiler report</a>
         </c:if>
     </c:if>
 </c:if>
