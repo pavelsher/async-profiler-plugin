@@ -3,8 +3,13 @@ package org.jetbrains.teamcity.asyncProfiler;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.serverSide.auth.AccessDeniedException;
+import jetbrains.buildServer.serverSide.auth.Permission;
+import jetbrains.buildServer.serverSide.impl.auth.ServerAuthUtil;
+import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
+import jetbrains.buildServer.web.util.SessionUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.web.servlet.ModelAndView;
@@ -26,8 +31,13 @@ public class AsyncProfilerController extends BaseController {
 
   @Nullable
   @Override
-  protected ModelAndView doHandle(@NotNull HttpServletRequest httpServletRequest, @NotNull HttpServletResponse httpServletResponse) {
-    ProfilerSettingsBean settingsBean = FormUtil.getOrCreateForm(httpServletRequest, ProfilerSettingsBean.class, r -> new ProfilerSettingsBean(myServerPaths));
+  protected ModelAndView doHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse httpServletResponse) {
+    SUser user = SessionUser.getUser(request);
+    if (!user.isPermissionGrantedGlobally(Permission.MANAGE_SERVER_INSTALLATION)) {
+      throw new AccessDeniedException(user, "You do not have permissions to access this page");
+    }
+
+    ProfilerSettingsBean settingsBean = FormUtil.getOrCreateForm(request, ProfilerSettingsBean.class, r -> new ProfilerSettingsBean(myServerPaths));
     ModelAndView mv = new ModelAndView(myPluginDescriptor.getPluginResourcesPath("profiler.jsp"));
     mv.getModel().put("settingsBean", settingsBean);
     return mv;
