@@ -9,6 +9,7 @@
             BS.ajaxRequest($('profilerForm').action, {
                 parameters: 'profilerPath=' + encodeURIComponent($j('#profilerPath').val()) +
                             '&args=' + encodeURIComponent($j('#args').val()) +
+                            '&sessionName=' + encodeURIComponent($j('#sessionName').val()) +
                             '&startProfiler=1',
                 onComplete: function(transport) {
                     if (transport.responseXML) {
@@ -43,9 +44,15 @@
             </td>
         </tr>
         <tr>
-            <th><label for="args">Additional arguments:</label></th>
+            <th><label for="args">Async profiler additional arguments:</label></th>
             <td>
                 <forms:textField name="args" id="args" value="${settingsBean.args}" className="longField"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="sessionName">Profiler session name:</label></th>
+            <td>
+                <forms:textField name="sesstionName" id="sessionName" value="${settingsBean.sessionName}" className="longField"/>
             </td>
         </tr>
         <tr>
@@ -68,6 +75,9 @@
             $('profilerComponent').refresh();
         }, 3000);
     </script>
+    </c:if>
+    <c:if test="${settingsBean.profilerSession.finished}">
+        <a href="<c:url value='/admin/admin.html?item=diagnostics&tab=logs&file=${settingsBean.profilerSession.reportPath}'/>">Profiler report</a>
     </c:if>
 </c:if>
 </bs:refreshable>

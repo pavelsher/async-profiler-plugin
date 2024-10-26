@@ -18,6 +18,7 @@ public class AsyncProfiler {
   private final String myReportPath;
   private final File myPidFile;
   private final ExecutorService myExecutor;
+  private final ServerPaths myServerPaths;
 
   public AsyncProfiler(@NotNull String asprofPath, @NotNull String args, @NotNull String reportPath,
                        @NotNull ServerPaths serverPaths,
@@ -27,6 +28,7 @@ public class AsyncProfiler {
     myReportPath = reportPath;
     myPidFile = new File(serverPaths.getLogsPath(), "teamcity.pid");
     myExecutor = executor;
+    myServerPaths = serverPaths;
   }
 
   @NotNull
@@ -50,6 +52,7 @@ public class AsyncProfiler {
     cli.addParameter(pid);
 
     AsyncProfilerSession session = new AsyncProfilerSession();
+    session.setRelativeReportPath(FileUtil.getRelativePath(myServerPaths.getLogsPath(), new File(myReportPath)).replace('\\', '/'));
     session.setFuture(CompletableFuture.supplyAsync(() -> SimpleCommandLineProcessRunner.runCommand(cli, null), myExecutor));
     return session;
   }

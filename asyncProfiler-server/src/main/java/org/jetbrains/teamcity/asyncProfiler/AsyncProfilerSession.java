@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class AsyncProfilerSession {
   private CompletableFuture<ExecResult> myFuture;
   private Date myStartTime;
+  private String myReportPath;
 
   @Nullable
   public ExecResult getResult() {
@@ -29,5 +30,13 @@ public class AsyncProfilerSession {
   public void setFuture(@NotNull CompletableFuture<ExecResult> future) {
     myStartTime = new Date();
     myFuture = future;
+  }
+
+  public void setRelativeReportPath(String reportPath) {
+    myReportPath = reportPath;
+  }
+
+  public String getReportPath() {
+    return myReportPath;
   }
 }
