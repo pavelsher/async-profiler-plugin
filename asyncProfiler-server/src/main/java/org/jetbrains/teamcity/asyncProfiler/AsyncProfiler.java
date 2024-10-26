@@ -39,7 +39,7 @@ public class AsyncProfiler {
 
     String pid;
     try {
-      pid = FileUtil.readText(myPidFile);
+      pid = FileUtil.readText(myPidFile).trim();
     } catch (IOException e) {
       throw new RuntimeException("Cannot read from the pid file " + myPidFile.getAbsolutePath(), e);
     }
