@@ -7,8 +7,7 @@
     var Profiler = {
         start: function() {
             BS.ajaxRequest($('profilerForm').action, {
-                parameters: 'profilerPath=' + encodeURIComponent($j('#profilerPath').val()) +
-                            '&args=' + encodeURIComponent($j('#args').val()) +
+                parameters: 'args=' + encodeURIComponent($j('#args').val()) +
                             '&sessionName=' + encodeURIComponent($j('#sessionName').val()) +
                             '&startProfiler=1',
                 onComplete: function(transport) {
@@ -38,9 +37,9 @@
             <td colspan="2">Async profiler settings</td>
         </tr>
         <tr>
-            <th><label for="profilerPath">Path to asprof executable:</label></th>
+            <th>Path to asprof executable:</th>
             <td>
-                <forms:textField name="profilerPath" id="profilerPath" value="${settingsBean.profilerPath}" className="longField"/>
+                <c:out value="${settingsBean.profilerPath}"/>
             </td>
         </tr>
         <tr>

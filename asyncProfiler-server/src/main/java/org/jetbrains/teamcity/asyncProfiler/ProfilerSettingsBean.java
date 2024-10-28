@@ -3,20 +3,20 @@ package org.jetbrains.teamcity.asyncProfiler;
 import org.jetbrains.annotations.NotNull;
 
 public class ProfilerSettingsBean {
-  private String myProfilerPath = "asprof";
+  private final String myProfilerPath;
   private String myReportsPath;
   private String mySessionName = "profile";
   private String myArgs = "-d 60";
 
   private AsyncProfilerSession myProfilerSession;
 
+  public ProfilerSettingsBean(@NotNull String profilerPath) {
+    myProfilerPath = profilerPath;
+  }
+
   @NotNull
   public String getProfilerPath() {
     return myProfilerPath;
-  }
-
-  public void setProfilerPath(@NotNull String profilerPath) {
-    myProfilerPath = profilerPath;
   }
 
   @NotNull

@@ -6,6 +6,7 @@ import jetbrains.buildServer.controllers.XmlResponseUtil;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.auth.AccessDeniedException;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.users.SUser;
@@ -62,7 +63,7 @@ public class AsyncProfilerController extends BaseController {
     }
 
     ProfilerSettingsBean settingsBean = FormUtil.getOrCreateForm(request, ProfilerSettingsBean.class, r -> {
-      ProfilerSettingsBean bean = new ProfilerSettingsBean();
+      ProfilerSettingsBean bean = new ProfilerSettingsBean(TeamCityProperties.getProperty("teamcity.asyncProfiler.profilerPath", "asprof"));
       bean.setReportsPath(myReportsPath.getAbsolutePath());
       return bean;
     });
