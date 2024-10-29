@@ -40,6 +40,9 @@
             <th>Path to asprof executable:</th>
             <td>
                 <c:out value="${settingsBean.profilerPath}"/>
+                <span class="smallNote" style="margin-left: 0">
+                    Can be redefined via internal property <strong>teamcity.asyncProfiler.profilerPath</strong>.
+                </span>
             </td>
         </tr>
         <tr>

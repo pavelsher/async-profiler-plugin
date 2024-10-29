@@ -3,6 +3,7 @@ package org.jetbrains.teamcity.asyncProfiler;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import jetbrains.buildServer.ExecResult;
 import jetbrains.buildServer.SimpleCommandLineProcessRunner;
+import jetbrains.buildServer.serverSide.IOGuard;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
@@ -58,7 +59,7 @@ public class AsyncProfiler {
     cli.addParameter(pid);
 
     session.setCommandLine(cli.getCommandLineString());
-    session.setFuture(CompletableFuture.supplyAsync(() -> SimpleCommandLineProcessRunner.runCommand(cli, null), myExecutor));
+    session.setFuture(CompletableFuture.supplyAsync(() -> IOGuard.allowCommandLine(() -> SimpleCommandLineProcessRunner.runCommand(cli, null)), myExecutor));
     return session;
   }
 
