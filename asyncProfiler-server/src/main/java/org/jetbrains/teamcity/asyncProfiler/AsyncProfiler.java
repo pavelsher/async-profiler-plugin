@@ -8,11 +8,14 @@ import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncProfiler {
   private final String myAsprofPath;
@@ -51,6 +54,15 @@ public class AsyncProfiler {
       return session;
     }
 
+    AtomicInteger maxProfilingDurationSeconds = new AtomicInteger(90);
+    List<String> params = StringUtil.split(myArgs, true, ' ');
+    for (int i = 0; i < params.size(); i++) {
+      if (params.get(i).equals("-d") && i < params.size() - 1) {
+        String duration = params.get(i + 1);
+        maxProfilingDurationSeconds.set(Math.round(1.5f * Integer.parseInt(duration)));
+      }
+    }
+
     GeneralCommandLine cli = new GeneralCommandLine();
     cli.setExePath(myAsprofPath);
     cli.addParameters(StringUtil.split(myArgs, true, ' '));
@@ -59,7 +71,13 @@ public class AsyncProfiler {
     cli.addParameter(pid);
 
     session.setCommandLine(cli.getCommandLineString());
-    session.setFuture(CompletableFuture.supplyAsync(() -> IOGuard.allowCommandLine(() -> SimpleCommandLineProcessRunner.runCommand(cli, null)), myExecutor));
+
+    session.setFuture(CompletableFuture.supplyAsync(() -> IOGuard.allowCommandLine(() -> SimpleCommandLineProcessRunner.runCommand(cli, null, new SimpleCommandLineProcessRunner.RunCommandEventsAdapter() {
+      @Override
+      public Integer getOutputIdleSecondsTimeout() {
+        return maxProfilingDurationSeconds.get();
+      }
+    })), myExecutor));
     return session;
   }
 
