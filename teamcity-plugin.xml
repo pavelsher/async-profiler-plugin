@@ -3,7 +3,7 @@
   <info>
     <name>asyncProfiler</name>
     <display-name>Async Profiler</display-name>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
     <description>Allows profiling TeamCity server with help of https://github.com/async-profiler/async-profiler</description>
     <email>Plugin author e-mail</email>
     <vendor>
