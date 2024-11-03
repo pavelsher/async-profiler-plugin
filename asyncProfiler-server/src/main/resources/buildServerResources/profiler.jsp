@@ -51,6 +51,9 @@
             <th><label for="args">Async profiler additional arguments:</label></th>
             <td>
                 <forms:textField name="args" id="args" value="${settingsBean.args}" className="longField"/>
+                <span class="smallNote">
+                    Please refer to <a href="https://github.com/async-profiler/async-profiler" target="_blank">asprof documentation</a> for details.
+                </span>
             </td>
         </tr>
         <tr>
