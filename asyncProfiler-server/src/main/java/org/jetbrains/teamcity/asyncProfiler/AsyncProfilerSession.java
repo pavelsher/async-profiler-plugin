@@ -24,7 +24,7 @@ public class AsyncProfilerSession {
   }
 
   public boolean isFinished() {
-    return myFuture.isDone();
+    return myFuture == null || myFuture.isDone();
   }
 
   public boolean isFailed() {

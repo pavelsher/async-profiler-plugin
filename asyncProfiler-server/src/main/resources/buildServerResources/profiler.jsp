@@ -6,6 +6,7 @@
 <script type="text/javascript">
     var Profiler = {
         start: function() {
+            $j('#profilerError').text('');
             BS.ajaxRequest($('profilerForm').action, {
                 parameters: 'args=' + encodeURIComponent($j('#args').val()) +
                             '&sessionName=' + encodeURIComponent($j('#sessionName').val()) +
@@ -13,8 +14,8 @@
                 onComplete: function(transport) {
                     if (transport.responseXML) {
                         BS.XMLResponse.processErrors(transport.responseXML, {
-                            onProfilerProblemError: function(elem) {
-                                alert(elem.firstChild.nodeValue);
+                            onStartFailedError: function(elem) {
+                                $j('#profilerError').text(elem.firstChild.nodeValue);
                             }
                         });
                     }
@@ -28,8 +29,9 @@
     };
 </script>
 <c:url var="actionUrl" value="/admin/diagnostics/asyncProfiler.html"/>
+<div class="error" id="profilerError" style="margin: 5px 0 0 0"></div>
+
 <bs:refreshable containerId="profilerComponent" pageUrl="${pageUrl}">
-<bs:messages key="profilerMessage"/>
 
 <form action="${actionUrl}" id="profilerForm">
     <table class="runnerFormTable" style="margin-top: 0.5em">
@@ -82,9 +84,9 @@
     </c:if>
     <c:if test="${session.finished}">
         <c:if test="${session.failed}">
-            <pre style="color:red">Execution failed</pre>
+            <pre style="color: #a90f1a">Execution failed</pre>
             <c:if test="${not empty session.result.exception}">
-                <pre style="color:red"><c:out value="${session.result.exception.message}"/></pre>
+                <pre style="color: #a90f1a"><c:out value="${session.result.exception.message}"/></pre>
             </c:if>
         </c:if>
         <c:if test="${not empty session.result.stdout}">

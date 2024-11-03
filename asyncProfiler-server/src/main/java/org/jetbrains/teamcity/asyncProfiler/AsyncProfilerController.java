@@ -1,12 +1,12 @@
 package org.jetbrains.teamcity.asyncProfiler;
 
+import jetbrains.buildServer.controllers.ActionErrors;
 import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.controllers.FormUtil;
 import jetbrains.buildServer.controllers.XmlResponseUtil;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerPaths;
-import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.auth.AccessDeniedException;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.users.SUser;
@@ -31,20 +31,20 @@ import java.util.concurrent.ExecutorService;
 
 public class AsyncProfilerController extends BaseController {
   public static final String URL = "/admin/diagnostics/asyncProfiler.html";
-  private final ServerPaths myServerPaths;
   private final PluginDescriptor myPluginDescriptor;
   private final File myReportsPath;
   private final ExecutorService myExecutor;
+  private final AsyncProfiler myAsyncProfiler;
 
   public AsyncProfilerController(@NotNull WebControllerManager controllerManager,
                                  @NotNull ServerPaths serverPaths,
                                  @NotNull PluginDescriptor pluginDescriptor,
                                  @NotNull EventDispatcher<BuildServerListener> eventDispatcher) {
     controllerManager.registerController(URL, this);
-    myServerPaths = serverPaths;
     myPluginDescriptor = pluginDescriptor;
     myReportsPath = new File(serverPaths.getLogsPath(), "async-profiler");
     myExecutor = ExecutorsFactory.newFixedDaemonExecutor("AsyncProfiler", 1);
+    myAsyncProfiler = new AsyncProfiler(serverPaths, myExecutor);
 
     eventDispatcher.addListener(new BuildServerAdapter() {
       @Override
@@ -63,7 +63,7 @@ public class AsyncProfilerController extends BaseController {
     }
 
     ProfilerSettingsBean settingsBean = FormUtil.getOrCreateForm(request, ProfilerSettingsBean.class, r -> {
-      ProfilerSettingsBean bean = new ProfilerSettingsBean(TeamCityProperties.getProperty("teamcity.asyncProfiler.profilerPath", "asprof"));
+      ProfilerSettingsBean bean = new ProfilerSettingsBean(myAsyncProfiler.getProfilerPath());
       bean.setReportsPath(myReportsPath.getAbsolutePath());
       return bean;
     });
@@ -78,13 +78,17 @@ public class AsyncProfilerController extends BaseController {
         throw new RuntimeException("Cannot create directory for the profiler reports: " + myReportsPath.getAbsolutePath());
       }
 
+      Element element = XmlResponseUtil.newXmlResponse();
       SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
       File reportPath = new File(myReportsPath, settingsBean.getSessionName() + "-" + df.format(new Date()) + ".html");
-      AsyncProfiler profiler = new AsyncProfiler(settingsBean.getProfilerPath(), settingsBean.getArgs(), reportPath.getAbsolutePath(), myServerPaths, myExecutor);
-      settingsBean.setProfilerSession(profiler.start());
-
-      Element element = XmlResponseUtil.newXmlResponse();
-      element.setText("started");
+      try {
+        settingsBean.setProfilerSession(myAsyncProfiler.start(settingsBean.getArgs(), reportPath.getAbsolutePath()));
+        element.setText("started");
+      } catch (Throwable e) {
+        ActionErrors errors = new ActionErrors();
+        errors.addError("startFailed", e.getMessage());
+        XmlResponseUtil.writeErrors(element, errors);
+      }
       XmlResponseUtil.writeXmlResponse(element, httpServletResponse);
       return null;
     }
